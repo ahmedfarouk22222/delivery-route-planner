@@ -3,6 +3,7 @@ package com.deliveryplanner;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -25,10 +26,6 @@ public class CsvDeliveryReader {
         Set<Integer> seenIds = new HashSet<>();
         Path path = Path.of(filePath);
 
-        if (!Files.exists(path)) {
-            throw new RuntimeException("Input file not found: " + filePath);
-        }
-
         try (BufferedReader reader = Files.newBufferedReader(path)) {
             String line;
             boolean firstLine = true;
@@ -37,6 +34,12 @@ public class CsvDeliveryReader {
             while ((line = reader.readLine()) != null) {
                 lineNumber++;
 
+                if (CsvUtils.isBlankRow(line)) {
+                    continue;
+                }
+
+                // firstLine means "first non-blank line", so a header still gets
+                // detected when the file starts with one or more empty lines.
                 if (firstLine) {
                     firstLine = false;
                     if (looksLikeHeader(line)) {
@@ -44,12 +47,10 @@ public class CsvDeliveryReader {
                     }
                 }
 
-                if (CsvUtils.isBlankRow(line)) {
-                    continue;
-                }
-
                 parseRow(line, lineNumber, seenIds, deliveries);
             }
+        } catch (NoSuchFileException e) {
+            throw new RuntimeException("Input file not found: " + filePath, e);
         } catch (IOException e) {
             throw new RuntimeException("Failed to read input file: " + filePath, e);
         }

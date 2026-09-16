@@ -22,6 +22,19 @@ java -cp out com.deliveryplanner.Main
 
 The same two commands work unchanged in PowerShell, cmd, and bash.
 
+To compile and run the test suite (see [Tests](#tests) below):
+
+```bash
+# Windows (note the ';' path separator)
+javac -d out -sourcepath "src/main/java;src/test/java" src/test/java/com/deliveryplanner/TestRunner.java
+
+# macOS / Linux (note the ':' path separator)
+javac -d out -sourcepath "src/main/java:src/test/java" src/test/java/com/deliveryplanner/TestRunner.java
+
+# Then, on any platform:
+java -cp out com.deliveryplanner.TestRunner
+```
+
 To run against different data or a different vehicle capacity, pass an alternative properties file as the
 single optional argument — nothing needs recompiling:
 
@@ -30,8 +43,9 @@ java -cp out com.deliveryplanner.Main path/to/other-config.properties
 ```
 
 **Output:** the report is printed to stdout *and* written to the file named by `output.file`
-(`output/trips.txt` by default; the directory is created automatically). Rejected input rows are listed on
-stdout after the report.
+(`output/trips.txt` by default; the directory is created automatically). Both carry exactly the same text,
+including the rejected-rows list at the end — a saved report is never missing information the console
+showed.
 
 ## Input Format
 
@@ -82,7 +96,33 @@ vehicle.capacity=10.0
 ```
 
 All three keys are required; `vehicle.capacity` must be a positive number. A missing or malformed key
-stops the program with a clear message instead of failing later.
+stops the program with a clear message instead of failing later. Note that `.properties` files treat the
+backslash as an escape character, so **paths must use forward slashes** even on Windows — this works fine
+on every platform.
+
+## Tests
+
+```bash
+java -cp out com.deliveryplanner.TestRunner
+```
+
+97 assertions across four suites, all of which must pass before the submission is considered working. The
+harness (`Assert` and `TestRunner`, about 120 lines together) is hand-written rather than JUnit for one
+reason: the run instructions above promise no external libraries and no build tool, and adding Maven just
+to get `@Test` would break that promise for a project whose whole point is that it is simple enough to
+read end to end. There is no reflection and no annotation magic — `TestRunner.main` calls each suite's
+`run()` method in order, `Assert` counts passes and failures, and the process exits non-zero if anything
+failed.
+
+| Suite | Covers |
+| --- | --- |
+| `DeliveryPlannerTest` | the two invariants the brief actually demands — **every delivery appears in exactly one trip**, and **no trip exceeds capacity** — plus the documented example plan, the first-fit-beats-next-fit case, area grouping within a priority tier, and that a reversed input produces an identical plan (the determinism claim below) |
+| `CsvDeliveryReaderTest` | every rejection branch with its exact reason string, the accepted forms (header present/absent/after a blank line, blank lines, padded fields), the exactly-at-capacity boundary, and that one bad row never stops the rest of the file |
+| `TripTest` | the capacity boundary, the `add()` guard, the unmodifiable delivery list, and the `Delivery` record's own validation |
+| `ReportGeneratorTest` | summary counts agree with the trips, rejected rows reach the report text, and an empty plan reports zeroes rather than `NaN` |
+
+Test fixtures are written to a temp directory rather than read from `src/main/resources`, so editing the
+committed sample files can never silently change what the tests assert.
 
 ## Example Run
 
@@ -156,7 +196,9 @@ existing ones can take it. The capacity check happens before the add, with a sec
 ## Extra Feature: Rejected-Row Audit Trail
 
 A bad row does not stop the run. Every rejected row is collected with its **line number, the raw text, and
-a specific reason**, then printed in its own block after the report:
+a specific reason**, then written in its own block at the end of the report — in the saved file as well as
+on stdout, since a count of six rejections is useless to whoever opens `output/trips.txt` later if it
+doesn't say *which* six:
 
 ```
 ========== Rejected Rows ==========
@@ -177,8 +219,9 @@ Reporting every problem in one pass means one run tells you everything that need
 counts (`Total / Valid / Rejected`) make it impossible to mistake a partial plan for a complete one.
 
 Smaller additions that came along the way: all settings are externalized to `config.properties` with an
-optional command-line override, and the report includes per-trip and fleet-wide utilization statistics so
-the quality of a plan is visible at a glance rather than having to be worked out by hand.
+optional command-line override, the report includes per-trip and fleet-wide utilization statistics so the
+quality of a plan is visible at a glance rather than having to be worked out by hand, and the dependency-free
+test suite described above pins both of the brief's invariants as executable checks.
 
 ## 1. Solution Approach
 

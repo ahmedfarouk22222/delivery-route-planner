@@ -19,10 +19,6 @@ public class ConfigReader {
         }
     }
 
-    public String get(String key) {
-        return properties.getProperty(key);
-    }
-
     public String getRequired(String key) {
         String value = properties.getProperty(key);
         if (value == null || value.isBlank()) {

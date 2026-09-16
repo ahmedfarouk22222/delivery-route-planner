@@ -1,3 +1,7 @@
 out/
 *.class
 output/
+
+# IDE
+.idea/
+*.iml

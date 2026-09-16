@@ -39,14 +39,8 @@ public class Main {
         List<Trip> trips = planner.plan(deliveries);
         int totalDeliveries = deliveries.size() + reader.getRejectedRows().size();
         ReportGenerator reportGenerator = new ReportGenerator();
-        String report = reportGenerator.generate(trips, totalDeliveries, reader.getRejectedRows().size());
-        System.out.println(report);
-
-        if (!reader.getRejectedRows().isEmpty()) {
-            System.out.println("========== Rejected Rows ==========");
-            reader.getRejectedRows().forEach(System.out::println);
-            System.out.println("====================================\n");
-        }
+        String report = reportGenerator.generate(trips, totalDeliveries, reader.getRejectedRows());
+        System.out.print(report);
 
         writeOutput(config.outputFile(), report);
     }

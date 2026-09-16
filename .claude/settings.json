@@ -1,16 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Read(//c/Program Files/java/**)",
-      "Read(//c/Program Files/java/jdk-24.0.2/bin/**)",
-      "PowerShell($b = [System.IO.File]::ReadAllBytes\\(\"C:\\\\Program Files\\\\java\\\\jdk-24.0.2\\\\bin\\\\java\"\\)[0..3]; \\($b | ForEach-Object { \"{0:X2}\" -f $_ }\\) -join \" \"; [System.Text.Encoding]::ASCII.GetString\\([System.IO.File]::ReadAllBytes\\(\"C:\\\\Program Files\\\\java\\\\jdk-24.0.2\\\\bin\\\\java\"\\)[0..1]\\))",
-      "PowerShell(Set-Location \"d:\\\\3adeel\\\\delivery-route-planner\\\\delivery-route-planner\"; if \\(Test-Path out\\) { Get-ChildItem -Recurse out | Select-Object -ExpandProperty FullName } else { \"no out directory\" }; \"--- other JDKs ---\"; Get-ChildItem \"C:\\\\Program Files\",\"C:\\\\Program Files \\(x86\\)\",\"$env:LOCALAPPDATA\\\\Programs\" -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -match \"jdk|java|zulu|temurin|corretto|openjdk|Android\" } | Select-Object -ExpandProperty FullName)",
-      "Read(//c/Program Files/Android/**)",
-      "PowerShell($jdk = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\\\\bin\"; Set-Location \"d:\\\\3adeel\\\\delivery-route-planner\\\\delivery-route-planner\"; & \"$jdk\\\\java.exe\" -version; if \\(Test-Path \"$jdk\\\\javac.exe\"\\) { \"javac present\" } else { \"NO javac\" })",
-      "PowerShell($jdk = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\\\\bin\"; Set-Location \"d:\\\\3adeel\\\\delivery-route-planner\\\\delivery-route-planner\"; & \"$jdk\\\\java.exe\" -cp out com.deliveryplanner.Main; \"EXIT=$LASTEXITCODE\")",
-      "PowerShell($env:PATH = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\\\\bin;$env:PATH\"; Set-Location \"d:\\\\3adeel\\\\delivery-route-planner\"; java -cp out com.deliveryplanner.Main src/main/resources/config-sample-from-brief.properties; \"exit=$LASTEXITCODE\")",
-      "PowerShell($env:PATH = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\\\\bin;$env:PATH\"; Set-Location \"d:\\\\3adeel\\\\delivery-route-planner\"; java -cp out com.deliveryplanner.Main; \"exit=$LASTEXITCODE\"; \"outputs: \"; Get-ChildItem output | Select-Object -ExpandProperty Name)",
-      "PowerShell($env:PATH = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\\\\bin;$env:PATH\"; $sp = \"C:\\\\Users\\\\HP\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\d--3adeel-delivery-route-planner\\\\2c6ab0c0-77c6-43b3-bd8c-8597a7533ceb\\\\scratchpad\\\\nf\"; Set-Location $sp; javac NextFit.java; if \\($?\\) { java NextFit })"
+      "PowerShell(javac:*)",
+      "PowerShell(java:*)",
+      "Bash(git rm *)"
     ]
   }
 }
